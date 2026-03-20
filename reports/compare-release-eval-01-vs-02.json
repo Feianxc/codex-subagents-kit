@@ -1,0 +1,23 @@
+{
+  "base_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-01",
+  "candidate_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-02-post-cutover",
+  "variants": {
+    "baseline": {
+      "verdict": "PASS",
+      "regressions": [],
+      "token_delta": 316,
+      "output_token_delta": 393,
+      "total_score_delta": -4
+    },
+    "release": {
+      "verdict": "FAIL",
+      "regressions": [
+        "artifact_rigor",
+        "invocation_integrity"
+      ],
+      "token_delta": -39604,
+      "output_token_delta": -944,
+      "total_score_delta": -2
+    }
+  }
+}

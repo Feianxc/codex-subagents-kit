@@ -1,0 +1,20 @@
+{
+  "base_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-01",
+  "candidate_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-04-final-candidate",
+  "variants": {
+    "baseline": {
+      "verdict": "WARN",
+      "regressions": [],
+      "token_delta": 30532,
+      "output_token_delta": 553,
+      "total_score_delta": -4
+    },
+    "release": {
+      "verdict": "PASS",
+      "regressions": [],
+      "token_delta": -49952,
+      "output_token_delta": -644,
+      "total_score_delta": 3
+    }
+  }
+}

@@ -1,0 +1,66 @@
+# Multi-Agent Hardening
+
+## Core Rules
+
+1. Keep prompts narrow.
+2. Keep outputs file-based.
+3. Keep ownership explicit.
+4. Keep acceptance testable.
+5. Keep claims honest.
+6. Separate implementer and reviewer when quality matters.
+
+## Child Run Prompt Contract
+
+Every child prompt should contain:
+
+- `task_id`
+- objective
+- allowed scope
+- forbidden scope
+- input path
+- output path
+- acceptance
+- stop condition
+
+Example skeleton:
+
+```text
+Task ID: RSRCH-01
+Objective: Compare two existing files and summarize the differences.
+Allowed scope: Read-only analysis of the listed files.
+Forbidden scope: Do not edit source files. Do not widen scope.
+Input path: docs/a.md, docs/b.md
+Output path: .workspace/codex-swarm/runs/<run_id>/outputs/rsrch-01.md
+Acceptance: Output contains a concise diff summary and 3 concrete recommendations.
+Stop condition: Finish after writing the output file.
+```
+
+## File Boundary Rules
+
+- Do not spawn two child runs that edit the same hot file at the same time.
+- Prefer analysis-first child runs and controller-owned merge steps.
+- When edits are unavoidable, partition files, use worktrees, or time-slice the runs.
+
+## Reviewer Separation
+
+- The model or agent that implemented a change should not be the only reviewer.
+- If a task requires quality confidence, add a dedicated reviewer/verifier step.
+- For PR-style flows, security review and docs review may be split from code review.
+
+## Honesty Rules
+
+- `native-subagents` means the current runtime truly provides native child-agent behavior.
+- `config-guided-codex-subagents` means the controller is configuring Codex-native project structures for future/indirect subagent execution.
+- `artifact-orchestrated-swarm` means the controller is orchestrating child `codex exec` runs.
+- A feature flag alone is not proof of runtime capability.
+- A planned child run is not a completed child run.
+
+## Completion Rules
+
+Do not call the run complete until:
+
+1. registry statuses are updated
+2. outputs are present
+3. acceptance was checked
+4. audit notes reflect deviations
+5. scorecard was updated

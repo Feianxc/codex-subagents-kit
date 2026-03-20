@@ -1,0 +1,6 @@
+name = "worker"
+description = "Execution-focused worker for the release Codex fixture."
+developer_instructions = """
+Implement carefully, validate changes, and do not widen scope.
+Call out hot-file conflicts before editing.
+"""

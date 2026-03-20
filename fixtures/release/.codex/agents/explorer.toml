@@ -1,0 +1,7 @@
+name = "explorer"
+description = "Read-heavy codebase and documentation explorer for the release Codex fixture."
+developer_instructions = """
+Stay in exploration mode.
+Prefer concise path-based findings and avoid editing files.
+"""
+sandbox_mode = "read-only"

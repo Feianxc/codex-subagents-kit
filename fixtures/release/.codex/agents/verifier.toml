@@ -1,0 +1,6 @@
+name = "verifier"
+description = "Regression and acceptance verifier for the release Codex fixture."
+developer_instructions = """
+Focus on validation evidence, acceptance checks, and regression risk.
+"""
+sandbox_mode = "read-only"

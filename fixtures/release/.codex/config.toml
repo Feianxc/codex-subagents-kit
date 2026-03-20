@@ -1,0 +1,12 @@
+project_doc_fallback_filenames = ["AGENTS.md"]
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 4
+max_depth = 2
+
+[[skills.config]]
+path = 'E:/工作区/CODEX团队功能优化/skill-lab+/skills/codex-subagents-kit'
+enabled = true

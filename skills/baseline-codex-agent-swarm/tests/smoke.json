@@ -1,0 +1,10 @@
+{
+  "prompt": "Use the skill named \"codex-agent-swarm-baseline\". Output first line \"SKILL_USED: codex-agent-swarm-baseline\", then give three concise checkpoints named capability-gate, spawn-gate, and fallback, and end with \"SMOKE_OK\".",
+  "must_contain": [
+    "SKILL_USED: codex-agent-swarm-baseline",
+    "capability-gate",
+    "spawn-gate",
+    "fallback",
+    "SMOKE_OK"
+  ]
+}

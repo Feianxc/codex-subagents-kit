@@ -1,0 +1,24 @@
+{
+  "base_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-01",
+  "candidate_run_root": "E:\\工作区\\CODEX团队功能优化\\skill-lab+\\runs\\20260320-release-eval-03-wording-hardened",
+  "variants": {
+    "baseline": {
+      "verdict": "FAIL",
+      "regressions": [
+        "invocation_integrity"
+      ],
+      "token_delta": 51817,
+      "output_token_delta": 556,
+      "total_score_delta": -7
+    },
+    "release": {
+      "verdict": "FAIL",
+      "regressions": [
+        "artifact_rigor"
+      ],
+      "token_delta": -54717,
+      "output_token_delta": -821,
+      "total_score_delta": 1
+    }
+  }
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex Subagents Kit"
+  short_description: "Codex Subagents workflow, context efficiency, and audit"
+  default_prompt: "Use $codex-subagents-kit to plan or optimize Codex Subagents, .codex/agents, and artifact-backed execution paths with four-gate decisions and scorecard validation."
+policy:
+  allow_implicit_invocation: true

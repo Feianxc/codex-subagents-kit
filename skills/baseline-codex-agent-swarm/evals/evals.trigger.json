@@ -1,0 +1,18 @@
+[
+  {
+    "should_trigger": true,
+    "query": "这个任务要同时做代码扫描、文档梳理和回归验证，帮我在 Codex 里设计一个多代理 swarm，把 registry 和审计文件也落盘。"
+  },
+  {
+    "should_trigger": true,
+    "query": "我想验证当前 Codex runtime 到底能不能用 native multi_agent，如果不行就回退到 child codex exec，并记录证据。"
+  },
+  {
+    "should_trigger": false,
+    "query": "我在 Claude Code 里想用 TeamCreate / TaskCreate 搭一个 team runtime，帮我规划一下。"
+  },
+  {
+    "should_trigger": false,
+    "query": "帮我把 README 里一个错别字改掉，这个任务很小，不需要任何并行或 swarm。"
+  }
+]

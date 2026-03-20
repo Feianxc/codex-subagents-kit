@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Agent Swarm Baseline"
+  short_description: "Baseline Codex-only swarm orchestration and audit"
+  default_prompt: "Use $codex-agent-swarm-baseline to orchestrate this task in Codex only; prefer native multi-agent when feature and live tool evidence exist, otherwise use artifacts, spawn rules, and codex exec fallback."
