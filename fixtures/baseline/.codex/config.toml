@@ -4,5 +4,5 @@ project_doc_fallback_filenames = ["AGENTS.md"]
 multi_agent = true
 
 [[skills.config]]
-path = 'E:/工作区/CODEX团队功能优化/skill-lab/skills/baseline-codex-agent-swarm'
+path = '../../../skills/baseline-codex-agent-swarm'
 enabled = true

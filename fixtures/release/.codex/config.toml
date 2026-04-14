@@ -8,5 +8,5 @@ max_threads = 4
 max_depth = 2
 
 [[skills.config]]
-path = 'E:/工作区/CODEX团队功能优化/skill-lab+/skills/codex-subagents-kit'
+path = '../../../skills/codex-subagents-kit'
 enabled = true

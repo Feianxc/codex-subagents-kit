@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -96,6 +97,49 @@ def parse_native_tools(explicit_tools: list[str]) -> dict[str, object]:
     }
 
 
+def classify_session_gate(native_tooling: dict[str, object]) -> dict[str, object]:
+    tools = [str(tool) for tool in native_tooling.get("tools", [])]
+    source = str(native_tooling.get("source", "none"))
+    direct_native_tools = {"spawn_agent", "send_input", "wait_agent", "resume_agent", "close_agent"}
+    observed_direct = [tool for tool in tools if tool in direct_native_tools]
+
+    if observed_direct and source == "cli-args":
+        confidence = "strong"
+        passed = True
+        notes = [
+            "Live session tool evidence was recorded explicitly.",
+            "This is stronger than relying on feature flags or config alone.",
+        ]
+    elif observed_direct:
+        confidence = "medium"
+        passed = True
+        notes = [
+            "Native child-agent tools were observed indirectly.",
+            "Treat this as usable evidence, but less direct than explicit live-session observation.",
+        ]
+    elif tools:
+        confidence = "weak"
+        passed = True
+        notes = [
+            "Some native-tool evidence was recorded, but not the core child-agent control tools.",
+            "Do not over-claim native-subagents without corroborating evidence.",
+        ]
+    else:
+        confidence = "none"
+        passed = False
+        notes = [
+            "No live native child-agent tool evidence was recorded.",
+            "Feature flags and config may still justify config-guided setup, but not native-subagents claims.",
+        ]
+
+    return {
+        "pass": passed,
+        "confidence": confidence,
+        "observed_tools": observed_direct,
+        "notes": notes,
+    }
+
+
 def read_toml_if_exists(path: Path) -> dict[str, object]:
     if not path.exists() or not path.is_file():
         return {}
@@ -125,6 +169,53 @@ def extract_skills_config_count(config: dict[str, object]) -> int | None:
     if isinstance(cfg, list):
         return len(cfg)
     return None
+
+
+def build_config_guided_evidence(
+    home_config_path: Path,
+    project_config_path: Path,
+    global_agents_dir: Path,
+    project_agents_dir: Path,
+    home_snapshot: dict[str, object],
+    project_snapshot: dict[str, object],
+) -> dict[str, object]:
+    signals: list[str] = []
+    if project_agents_dir.exists():
+        signals.append("project_agents_dir")
+    if global_agents_dir.exists():
+        signals.append("global_agents_dir")
+    if project_config_path.exists():
+        signals.append("project_config")
+    if home_config_path.exists():
+        signals.append("home_config")
+    if project_snapshot.get("defined_roles"):
+        signals.append("project_agent_roles")
+    if home_snapshot.get("defined_roles"):
+        signals.append("home_agent_roles")
+    if project_snapshot.get("skills_config_count"):
+        signals.append("project_skills_config")
+    if home_snapshot.get("skills_config_count"):
+        signals.append("home_skills_config")
+
+    return {
+        "available": bool(signals),
+        "signals": signals,
+        "notes": (
+            [
+                "Project or home Codex config artifacts were found.",
+                "These support config-guided subagent setup, but they are not proof of live native session tooling.",
+            ]
+            if signals
+            else ["No project/home config-guided subagent evidence was found."]
+        ),
+    }
+
+
+def contains_pattern(command_result: dict[str, object], pattern: str) -> bool:
+    if not command_result.get("ok"):
+        return False
+    stdout = str(command_result.get("stdout", ""))
+    return re.search(pattern, stdout, flags=re.IGNORECASE) is not None
 
 
 def main() -> int:
@@ -180,20 +271,61 @@ def main() -> int:
     global_agents_dir = Path.home() / ".codex" / "agents"
     project_agents_dir = workspace_root / ".codex" / "agents"
 
-    product_gate = bool(multi_agent["enabled"])
-    session_gate = bool(native_tooling["observed"])
+    home_agents_snapshot = extract_agents_config(home_config)
+    project_agents_snapshot = extract_agents_config(project_config)
+    home_skills_config_count = extract_skills_config_count(home_config)
+    project_skills_config_count = extract_skills_config_count(project_config)
+    if home_skills_config_count is not None:
+        home_agents_snapshot["skills_config_count"] = home_skills_config_count
+    if project_skills_config_count is not None:
+        project_agents_snapshot["skills_config_count"] = project_skills_config_count
 
-    if product_gate and session_gate:
+    product_gate = {
+        "pass": bool(multi_agent["enabled"]),
+        "notes": (
+            [
+                "The `multi_agent` feature flag is enabled.",
+                "This is product-layer support only; it does not prove current-session native tooling.",
+            ]
+            if multi_agent["enabled"]
+            else [
+                "The `multi_agent` feature flag was not observed as enabled.",
+                "Default to artifact-orchestrated-swarm unless independent product evidence exists.",
+            ]
+        ),
+    }
+    session_gate = classify_session_gate(native_tooling)
+    config_guided_evidence = build_config_guided_evidence(
+        home_config_path=home_config_path,
+        project_config_path=project_config_path,
+        global_agents_dir=global_agents_dir,
+        project_agents_dir=project_agents_dir,
+        home_snapshot=home_agents_snapshot,
+        project_snapshot=project_agents_snapshot,
+    )
+    exec_capability = {
+        "available": bool(exec_help.get("ok")),
+        "supports_output_last_message": contains_pattern(exec_help, r"output-last-message"),
+        "supports_json": contains_pattern(exec_help, r"--json"),
+    }
+
+    if product_gate["pass"] and session_gate["pass"]:
         recommended_mode = "native-subagents"
         assessment_notes = [
             "Product Gate and Session Gate both pass.",
             "Use native-subagents first, but keep controller-owned audit and acceptance.",
         ]
-    elif product_gate:
+    elif product_gate["pass"] and config_guided_evidence["available"]:
         recommended_mode = "config-guided-codex-subagents"
         assessment_notes = [
-            "Product Gate passes, but current-session native tool evidence was not recorded.",
-            "Prefer config-guided project setup; do not claim native-subagents from feature flags alone.",
+            "Product Gate passes, but Session Gate is not strong enough for native-subagents claims.",
+            "Prefer config-guided project setup; do not claim native-subagents from feature flags or config alone.",
+        ]
+    elif product_gate["pass"]:
+        recommended_mode = "config-guided-codex-subagents"
+        assessment_notes = [
+            "Product Gate passes, but no strong session or config-guided evidence was recorded.",
+            "Config-guided setup is still the more honest default than claiming native-subagents.",
         ]
     else:
         recommended_mode = "artifact-orchestrated-swarm"
@@ -221,10 +353,10 @@ def main() -> int:
             "project_config_exists": project_config_path.exists(),
         },
         "config_snapshot": {
-            "home_agents": extract_agents_config(home_config),
-            "project_agents": extract_agents_config(project_config),
-            "home_skills_config_count": extract_skills_config_count(home_config),
-            "project_skills_config_count": extract_skills_config_count(project_config),
+            "home_agents": home_agents_snapshot,
+            "project_agents": project_agents_snapshot,
+            "home_skills_config_count": home_skills_config_count,
+            "project_skills_config_count": project_skills_config_count,
         },
         "commands": {
             "codex_executable": codex_executable if "codex_executable" in locals() else None,
@@ -233,6 +365,12 @@ def main() -> int:
             "codex_exec_help": exec_help,
             "codex_help": codex_help,
         },
+        "gates": {
+            "product_gate": product_gate,
+            "session_gate": session_gate,
+        },
+        "config_guided_evidence": config_guided_evidence,
+        "exec_capability": exec_capability,
         "assessment": {
             "recommended_mode": recommended_mode,
             "notes": assessment_notes,
@@ -251,8 +389,13 @@ def main() -> int:
                 f"- Codex version: `{version['stdout']}`\n"
                 f"- multi_agent stage: `{multi_agent['stage']}`\n"
                 f"- multi_agent enabled: `{multi_agent['enabled']}`\n"
+                f"- Product Gate: `{product_gate['pass']}`\n"
+                f"- Session Gate: `{session_gate['pass']}`\n"
+                f"- Session confidence: `{session_gate['confidence']}`\n"
                 f"- Native tooling observed: `{native_tooling['observed']}`\n"
                 f"- Native tools: `{', '.join(native_tooling['tools']) if native_tooling['tools'] else 'none'}`\n"
+                f"- Config-guided evidence: `{config_guided_evidence['available']}`\n"
+                f"- Config-guided signals: `{', '.join(config_guided_evidence['signals']) if config_guided_evidence['signals'] else 'none'}`\n"
                 f"- Global agents dir exists: `{global_agents_dir.exists()}`\n"
                 f"- Project agents dir exists: `{project_agents_dir.exists()}`\n"
                 f"- Recommended mode: `{result['assessment']['recommended_mode']}`\n"
@@ -262,9 +405,13 @@ def main() -> int:
 
     print(f"PROBE_FILE={output_path}")
     print(f"CODEX_VERSION={version['stdout']}")
+    print(f"PRODUCT_GATE={product_gate['pass']}")
+    print(f"SESSION_GATE={session_gate['pass']}")
+    print(f"SESSION_CONFIDENCE={session_gate['confidence']}")
     print(f"MULTI_AGENT_ENABLED={multi_agent['enabled']}")
     print(f"NATIVE_TOOLING_OBSERVED={native_tooling['observed']}")
     print(f"NATIVE_TOOLS={','.join(native_tooling['tools'])}")
+    print(f"CONFIG_GUIDED_EVIDENCE={config_guided_evidence['available']}")
     print(f"RECOMMENDED_MODE={result['assessment']['recommended_mode']}")
     return 0
 

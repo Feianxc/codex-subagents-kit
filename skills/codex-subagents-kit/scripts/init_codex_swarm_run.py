@@ -21,6 +21,30 @@ ARTIFACTS = (
 )
 
 SUBDIRS = ("prompts", "outputs", "logs", "manifests")
+CONTRACT_VERSION = 2
+REGISTRY_COLUMNS = (
+    "Task ID",
+    "Owner",
+    "Status",
+    "Blocked By",
+    "Input Path",
+    "Output Path",
+    "Acceptance",
+    "Spawn Reason",
+    "Stop Condition",
+    "Escalation / Fallback",
+    "Evidence Path",
+)
+SCORECARD_DIMENSIONS = (
+    ("Single-controller-first", "official"),
+    ("Ownership-first routing", "official"),
+    ("Context boundary discipline", "official"),
+    ("Runtime honesty", "official"),
+    ("Artifact contract integrity", "engineering"),
+    ("Stop/fallback discipline", "official"),
+    ("Validation/regression evidence", "official+engineering"),
+    ("Audit honesty", "official"),
+)
 
 
 def utc_now() -> datetime:
@@ -105,10 +129,12 @@ def build_execution_plan(run_id: str, run_root: Path) -> str:
 ## Chosen Mode
 
 - Mode: `TBD`
+- Ownership shape: `TBD`
 - Feature flag evidence: `TBD`
 - Native tool evidence: `TBD`
-- Preferred mode when proven: `native-multi-agent`
+- Preferred mode when proven: `native-subagents`
 - Artifact path: `artifact-orchestrated-swarm`
+- Controller-owned merge: `required`
 
 ## Phases
 
@@ -123,6 +149,7 @@ def build_execution_plan(run_id: str, run_root: Path) -> str:
 - [ ] Registry initialized
 - [ ] Outputs assigned
 - [ ] Acceptance rules written
+- [ ] Stop / fallback rules written
 - [ ] Audit updated
 """
 
@@ -132,9 +159,10 @@ def build_registry(run_id: str, run_root: Path) -> str:
 
 - Run ID: `{run_id}`
 - Run Root: `{run_root}`
+- Contract Version: `v{CONTRACT_VERSION}`
 
-| Task ID | Owner | Status | Blocked By | Input Path | Output Path | Acceptance | Spawn Reason |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| Task ID | Owner | Status | Blocked By | Input Path | Output Path | Acceptance | Spawn Reason | Stop Condition | Escalation / Fallback | Evidence Path |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 """
 
 
@@ -143,26 +171,50 @@ def build_protocol_audit(run_id: str, run_root: Path) -> str:
 
 - Run ID: `{run_id}`
 - Run Root: `{run_root}`
+- Contract Version: `v{CONTRACT_VERSION}`
 
 ## Runtime Mode
 
 - Claimed mode: `TBD`
+- Ownership shape: `TBD`
 - Feature flag state: `TBD`
 - Native multi-agent used: `TBD`
 - Native tool evidence: `TBD`
 - Child `codex exec` used: `TBD`
+
+## Four Gates
+
+- Product Gate: `TBD`
+- Session Gate: `TBD`
+- Policy Gate: `TBD`
+- Task Gate: `TBD`
+
+## Boundaries
+
+- `AGENTS.md` boundary: `TBD`
+- Tools / MCP boundary: `TBD`
+- Runtime state boundary: `TBD`
+- Model override: `inherit`
 
 ## Evidence
 
 - Capability probe:
 - Native tool probe:
 - Child run evidence:
+- Regression evidence:
 - Deviation log:
+
+## Stop / Fallback
+
+- Stop condition: `TBD`
+- Fallback: `TBD`
+- Escalation condition: `TBD`
 
 ## Final Assessment
 
 - Registry closed: `TBD`
 - Acceptance checked: `TBD`
+- Scorecard updated: `TBD`
 - Remaining gaps:
 """
 
@@ -190,19 +242,19 @@ def build_team_report(run_id: str, run_root: Path) -> str:
 
 
 def build_scorecard(run_id: str, run_root: Path) -> str:
+    rows = "\n".join(
+        f"| {dimension} | {source} |  |  |  |"
+        for dimension, source in SCORECARD_DIMENSIONS
+    )
     return f"""# Scorecard
 
 - Run ID: `{run_id}`
 - Run Root: `{run_root}`
+- Contract Version: `v{CONTRACT_VERSION}`
 
-| Dimension | Score (0-5) | Evidence |
-| --- | --- | --- |
-| Codex alignment |  |  |
-| Context efficiency |  |  |
-| Mode-selection accuracy |  |  |
-| Spawn quality |  |  |
-| Validation / acceptance |  |  |
-| Audit honesty |  |  |
+| Dimension | Source | Score (0-2) | Evidence | Notes |
+| --- | --- | --- | --- | --- |
+{rows}
 
 ## Notes
 
@@ -241,12 +293,18 @@ def main() -> int:
 
     manifest = {
         "run_id": run_id,
+        "contract_version": CONTRACT_VERSION,
         "workspace_root": str(workspace_root),
         "run_root": str(run_root),
         "case_name": args.case,
         "created_at_utc": utc_now().isoformat(),
         "required_artifacts": list(ARTIFACTS),
         "subdirectories": list(SUBDIRS),
+        "task_registry_required_columns": list(REGISTRY_COLUMNS),
+        "scorecard_dimensions": [
+            {"dimension": dimension, "source": source}
+            for dimension, source in SCORECARD_DIMENSIONS
+        ],
     }
     (run_root / "manifests" / "run.json").write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",

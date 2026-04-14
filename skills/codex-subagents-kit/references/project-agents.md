@@ -7,6 +7,8 @@
 - 减少每次重复解释角色职责
 - 让项目级角色优先于全局角色
 - 把 explorer / worker / reviewer / verifier 的边界固定下来
+- 让“谁负责综合、谁只负责 sidecar、谁只负责验证”长期稳定
+- 把 stop conditions / approval boundary / summary return contract 固化下来
 
 ## Recommended templates
 
@@ -45,3 +47,17 @@
 3. reviewer 不与 implementer 混同
 4. verifier 只负责测试、回归和 acceptance 证据
 5. 热文件改动仍由 controller 决定是否串行
+6. 默认由 controller 保留最终综合权；只有架构确实要求 specialist 接管时才设计 handoff
+7. 每个 project agent 都要写清 stop condition / escalation condition
+8. 默认返回 summary + evidence，而不是长篇原始日志
+
+## What belongs where
+
+- `AGENTS.md`
+  - repo norms、build/test/lint、done 定义、共享协作约束
+- `.codex/agents/*.toml`
+  - 角色边界、写权限、summary return、escalation rules
+- task prompt / registry
+  - 本轮目标、输入路径、输出路径、acceptance、time budget
+
+不要把这三层内容混在一个超长角色说明里。

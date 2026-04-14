@@ -1,6 +1,6 @@
 # Skill Lab Score Report
 
-- Run Root: `E:\工作区\CODEX团队功能优化\skill-lab+\runs\20260320-release-eval-04-final-candidate`
+- Historical Run ID: `20260320-release-eval-04-final-candidate`
 
 | Variant | Codex Alignment | Mode Selection | Topology | Context Efficiency | Artifact Rigor | Invocation Integrity | Token Efficiency | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

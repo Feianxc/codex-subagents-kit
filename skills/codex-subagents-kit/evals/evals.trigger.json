@@ -12,6 +12,14 @@
     "query": "请针对 Codex 自己的 subagents 机制设计一个 context-efficient 的 agent orchestration skill，优先考虑 `.codex/agents/`、`skills.config`、最小上下文和多维度评分。"
   },
   {
+    "should_trigger": true,
+    "query": "帮我判断这个研究任务是否真的需要多智能体；如果需要，请给出 ownership shape、research-swarm 角度切分、stop conditions，以及要不要落到 AGENTS.md。"
+  },
+  {
+    "should_trigger": true,
+    "query": "请为一个 Codex 多 agent 项目设计 AGENTS.md、tools/MCP、runtime state 的边界，并在当前 session 证据不足时诚实降级到 config-guided 或 artifact 路径。"
+  },
+  {
     "should_trigger": false,
     "query": "我在 Claude Code 里想用 TeamCreate / TaskCreate 搭一个 team runtime，帮我规划一下。"
   },

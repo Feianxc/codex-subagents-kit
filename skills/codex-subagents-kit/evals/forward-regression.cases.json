@@ -1,0 +1,83 @@
+[
+  {
+    "id": "case-01-single-controller-small-fix",
+    "title": "Single-controller for a small bug fix",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：修复一个小型 Python CLI 默认参数 bug，并补最小验证。请先判断 single-controller 是否足够。用精简结构输出以下字段：warranted, topology, ownership, mode, product-gate, session-gate, policy-gate, task-gate, stop-condition, fallback, why-not-spawn。",
+    "expected_topology": "single-controller",
+    "expected_runtime_mode": "single-controller",
+    "required_markers": ["single-controller", "ownership", "mode", "stop-condition", "fallback"],
+    "forbidden_markers": []
+  },
+  {
+    "id": "case-02-single-controller-debug",
+    "title": "Single-controller for focused debugging",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：根据 failing test 与日志定位一个缓存失效问题，只做最小修复与验证。请输出：warranted, topology, ownership, mode, stop-condition, fallback, tasks-not-worth-spawning。",
+    "expected_topology": "single-controller",
+    "expected_runtime_mode": "single-controller",
+    "required_markers": ["single-controller", "tasks-not-worth-spawning", "stop-condition"],
+    "forbidden_markers": []
+  },
+  {
+    "id": "case-03-manager-with-specialists",
+    "title": "Manager with specialists for cross-module delivery",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：给现有 web app 增加导出功能，涉及 API、前端按钮、回归验证，但主控保留最终综合权。请输出：warranted, topology, ownership, mode, spawn-candidates, stop-condition, fallback, summary-return。",
+    "expected_topology": "manager-with-specialists",
+    "expected_runtime_mode": "config-guided-codex-subagents",
+    "required_markers": ["manager-with-specialists", "ownership", "spawn-candidates", "summary"],
+    "forbidden_markers": []
+  },
+  {
+    "id": "case-04-research-swarm",
+    "title": "Research swarm with shared findings",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：基于 OpenAI / Codex / Anthropic 官方资料比较 2026 多智能体编排模式，并输出 gap review。必须区分官方结论与工程推断。请输出：warranted, topology, ownership, mode, angle-map, shared-findings, dedupe, official-vs-inference, stop-condition, fallback。",
+    "expected_topology": "research-swarm",
+    "expected_runtime_mode": ["native-subagents", "config-guided-codex-subagents", "artifact-orchestrated-swarm"],
+    "required_markers": ["research-swarm", "shared-findings", "official", "engineering", "stop-condition"],
+    "forbidden_markers": ["all explorers search the same angle"]
+  },
+  {
+    "id": "case-05-config-guided",
+    "title": "Config-guided codex subagents",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：为项目内团队流程设计 `.codex/agents/` 与 `skills.config`，但当前 session 不确认 live native subagents。请输出：warranted, topology, ownership, mode, product-gate, session-gate, agents-boundary, config-artifacts, fallback。",
+    "expected_topology": "manager-with-specialists",
+    "expected_runtime_mode": "config-guided-codex-subagents",
+    "required_markers": ["config-guided-codex-subagents", ".codex/agents", "skills.config", "session-gate"],
+    "forbidden_markers": ["native-subagents is already proven"]
+  },
+  {
+    "id": "case-06-artifact-fallback",
+    "title": "Artifact-orchestrated swarm fallback",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：把 12 个独立分析任务拆成可重放的 run_root，每个任务独立 prompt/output，最终汇总 scorecard。请输出：warranted, topology, ownership, mode, artifacts, registry, audit, scorecard, stop-condition, fallback。",
+    "expected_topology": "manager-with-specialists",
+    "expected_runtime_mode": "artifact-orchestrated-swarm",
+    "required_markers": ["artifact-orchestrated-swarm", "run_root", "task-registry", "protocol-audit", "scorecard"],
+    "forbidden_markers": []
+  },
+  {
+    "id": "case-07-generator-verifier-overlay",
+    "title": "Generator-verifier as overlay",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：先生成数据库迁移方案，再按 rollback / security / downtime rubric 做 verifier 评分与修正；不要把 verifier 当主拓扑。请输出：warranted, topology, ownership, mode, overlay, verifier-rubric, stop-condition, fallback。",
+    "expected_topology": "manager-with-specialists",
+    "expected_runtime_mode": "single-controller",
+    "required_markers": ["generator-verifier", "overlay", "rubric", "stop-condition"],
+    "forbidden_markers": ["verifier is the whole architecture"]
+  },
+  {
+    "id": "case-08-boundaries",
+    "title": "AGENTS.md and tools boundaries",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：为一个多 agent 项目定义 `AGENTS.md`、tools/MCP、runtime state 的边界，不要把动态协作状态写进 `AGENTS.md`。请输出：warranted, topology, mode, agents-boundary, tools-boundary, runtime-state-boundary, summary-return, fallback。",
+    "expected_topology": "single-controller",
+    "expected_runtime_mode": "single-controller",
+    "required_markers": ["AGENTS.md", "tools", "runtime-state", "summary"],
+    "forbidden_markers": ["put runtime state into AGENTS.md"]
+  },
+  {
+    "id": "case-09-negative-simple-task",
+    "title": "Negative case should stay simple",
+    "prompt": "Use the skill named \"codex-subagents-kit\". 任务：帮我把这段中文润色成英文邮件。请明确说明这个任务为什么不值得多智能体。输出：warranted, topology, mode, why-not-spawn, stop-condition。",
+    "expected_topology": "single-controller",
+    "expected_runtime_mode": "single-controller",
+    "required_markers": ["not warranted", "single-controller", "why-not-spawn"],
+    "forbidden_markers": []
+  }
+]

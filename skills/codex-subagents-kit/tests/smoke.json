@@ -1,12 +1,16 @@
 {
-  "prompt": "Use the skill named \"codex-subagents-kit\". Output first line \"SKILL_USED: codex-subagents-kit\", then give four concise checkpoints named product-gate, session-gate, policy-gate, and task-gate, then state one chosen mode and end with \"SMOKE_OK\".",
+  "prompt": "Use the skill named \"codex-subagents-kit\". Output first line \"SKILL_USED: codex-subagents-kit\", then say whether multi-agent is warranted, name the ownership shape, give four concise checkpoints named product-gate, session-gate, policy-gate, and task-gate, then state one chosen mode, one stop-condition, one fallback, and end with \"SMOKE_OK\".",
   "must_contain": [
     "SKILL_USED: codex-subagents-kit",
+    "multi-agent",
+    "ownership",
     "product-gate",
     "session-gate",
     "policy-gate",
     "task-gate",
     "mode",
+    "stop-condition",
+    "fallback",
     "SMOKE_OK"
   ]
 }

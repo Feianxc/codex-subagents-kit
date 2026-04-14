@@ -1,6 +1,6 @@
 # Discoverability Report
 
-- Run Root: `E:\工作区\CODEX团队功能优化\skill-lab+\runs\20260320-release-discovery-02-post-cutover`
+- Historical Run ID: `20260320-release-discovery-02-post-cutover`
 
 | Variant | Load Mode | Case | Success Rate | Avg Input Tokens | Avg Output Tokens |
 | --- | --- | --- | --- | --- | --- |
